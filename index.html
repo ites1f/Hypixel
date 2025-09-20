@@ -13,7 +13,7 @@
   <div id="out"></div>
 
   <script>
-    const API = "https://sparkling-mode-89ee.wsctieslf.workers.dev"; // <-- put your Worker URL
+    const API = "https://sparkling-mode-89ee.wsciteslf.workers.dev"; // <-- put your Worker URL
     async function byNameToUuid(name){
       const r = await fetch(`https://playerdb.co/api/player/minecraft/${encodeURIComponent(name)}`);
       const j = await r.json(); if(!j?.data?.player?.id) throw new Error("IGN not found");
