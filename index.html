@@ -1,42 +1,117 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width" />
-  <title>ProfileFinder</title>
-  <style>body{font-family:system-ui,Segoe UI,Arial;margin:2rem} .card{border:1px solid #ddd;border-radius:12px;padding:16px;margin:12px 0}</style>
+  <meta charset="utf-8"/>
+  <title>Hypixelstats_ites1f</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <style>
+    body { font-family: system-ui, Arial; margin: 2rem; background: #0b1220; color: #e9eefc; }
+    input, button { padding: 0.5rem; border-radius: 8px; border: 1px solid #555; }
+    button { background: #62d0ff; color: #000; font-weight: bold; cursor: pointer; }
+    .card { border: 1px solid #333; border-radius: 12px; padding: 16px; margin: 12px 0; background:#121a2e; }
+    h1 { color: #ffd166; }
+  </style>
 </head>
 <body>
-  <h1>ProfileFinder</h1>
-  <input id="ign" placeholder="Enter IGN (e.g., Notch)" />
+  <h1>Hypixel Stats (+Skyblock)</h1>
+  <input id="ign" placeholder="Enter IGN (e.g., ites1f)" />
   <button id="go">Search</button>
   <div id="out"></div>
 
-  <script>
-    const API = "https://sparkling-mode-89ee.wsciteslf.workers.dev"; // <-- put your Worker URL
-    async function byNameToUuid(name){
-      const r = await fetch(`https://playerdb.co/api/player/minecraft/${encodeURIComponent(name)}`);
-      const j = await r.json(); if(!j?.data?.player?.id) throw new Error("IGN not found");
-      return j.data.player.id.replace(/-/g,"");
-    }
-    async function lookup(){
-      const ign = document.getElementById("ign").value.trim();
-      const out = document.getElementById("out"); out.innerHTML = "Loading...";
-      try{
-        const uuid = await byNameToUuid(ign);
-        const [player, profiles, status, guild] = await Promise.all([
-          fetch(`${API}/api/player?uuid=${uuid}`).then(r=>r.json()),
-          fetch(`${API}/api/skyblock/profiles?uuid=${uuid}`).then(r=>r.json()),
-          fetch(`${API}/api/status?uuid=${uuid}`).then(r=>r.json()),
-          fetch(`${API}/api/guild?uuid=${uuid}`).then(r=>r.json()),
-        ]);
-        out.innerHTML = `
-          <div class="card"><b>General</b><br/>UUID: ${uuid}<br/>Name: ${player?.player?.displayname ?? "—"}<br/>Guild: ${guild?.guild?.name ?? "—"}<br/>Online: ${status?.session?.online ? "Yes":"No"}</div>
-          <div class="card"><b>SkyBlock</b><br/>Profiles: ${profiles?.profiles?.length ?? 0}<br/>First profile: ${profiles?.profiles?.[0]?.cute_name ?? "—"}</div>
-        `;
-      }catch(e){ out.textContent = "Error: " + e.message; }
-    }
-    document.getElementById("go").onclick = lookup;
-  </script>
+<script>
+const API = "https://sparkling-mode-89ee.wsciteslf.workers.dev"; // put your worker URL here
+
+async function byNameToUuid(name){
+  const r = await fetch(`https://playerdb.co/api/player/minecraft/${encodeURIComponent(name)}`);
+  if (!r.ok) throw new Error("PlayerDB lookup failed");
+  const j = await r.json();
+  if (!j?.data?.player?.id) throw new Error("IGN not found");
+  return j.data.player.id.replace(/-/g,"");
+}
+
+function xpToLevel(xp){
+  // Network XP → Network Level formula (approx)
+  return Math.floor(1 + Math.sqrt(xp + 15312.5) / 125);
+}
+
+function skillXpToLevel(xp){
+  // crude scaling (Hypixel has tables, but this is close)
+  return Math.floor(Math.pow(xp/50, 0.5));
+}
+
+async function lookup(){
+  const ign = document.getElementById("ign").value.trim();
+  const out = document.getElementById("out"); out.textContent = "Loading…";
+  try{
+    const uuid = await byNameToUuid(ign);
+
+    const [player, status, guild, profiles] = await Promise.all([
+      fetch(`${API}/api/player?uuid=${uuid}`).then(r=>r.json()),
+      fetch(`${API}/api/status?uuid=${uuid}`).then(r=>r.json()),
+      fetch(`${API}/api/guild?uuid=${uuid}`).then(r=>r.json()),
+      fetch(`${API}/api/skyblock/profiles?uuid=${uuid}`).then(r=>r.json()),
+    ]);
+
+    const p = player.player ?? {};
+    const g = guild.guild ?? {};
+    const st = status.session ?? {};
+    const prof = profiles.profiles?.find(x => x.selected) ?? profiles.profiles?.[0];
+    const sb = prof?.members?.[uuid] ?? {};
+
+    // Basic stats
+    const networkLevel = xpToLevel(p.networkExp ?? 0);
+    const fairySouls = sb.fairy_souls_collected ?? 0;
+    const slayers = sb.slayer_bosses ?? {};
+    const pets = sb.pets ?? [];
+
+    out.innerHTML = `
+      <div class="card">
+        <h2>General</h2>
+        Name: ${p.displayname ?? ign}<br/>
+        Rank: ${p.rank ?? p.newPackageRank ?? "—"}<br/>
+        Network Level: ${networkLevel}<br/>
+        Karma: ${p.karma ?? 0}
+      </div>
+      <div class="card">
+        <h2>Status</h2>
+        Online: ${st.online ? "Yes" : "No"}<br/>
+        Game: ${st.gameType ?? "—"}<br/>
+        Mode: ${st.mode ?? "—"}<br/>
+        Map: ${st.map ?? "—"}
+      </div>
+      <div class="card">
+        <h2>Guild</h2>
+        Name: ${g.name ?? "—"}<br/>
+        Tag: ${g.tag ?? "—"}
+      </div>
+      <div class="card">
+        <h2>SkyBlock (${prof?.cute_name ?? "—"})</h2>
+        Fairy Souls: ${fairySouls}<br/>
+        Skills (XP→Level rough):<br/>
+        Farming: ${skillXpToLevel(sb.experience_skill_farming ?? 0)}<br/>
+        Mining: ${skillXpToLevel(sb.experience_skill_mining ?? 0)}<br/>
+        Combat: ${skillXpToLevel(sb.experience_skill_combat ?? 0)}<br/>
+        Foraging: ${skillXpToLevel(sb.experience_skill_foraging ?? 0)}<br/>
+        Fishing: ${skillXpToLevel(sb.experience_skill_fishing ?? 0)}<br/>
+        Enchanting: ${skillXpToLevel(sb.experience_skill_enchanting ?? 0)}<br/>
+        Alchemy: ${skillXpToLevel(sb.experience_skill_alchemy ?? 0)}<br/>
+        Slayer XP totals:<br/>
+        Zombie: ${slayers?.zombie?.xp ?? 0}<br/>
+        Spider: ${slayers?.spider?.xp ?? 0}<br/>
+        Wolf: ${slayers?.wolf?.xp ?? 0}<br/>
+        Enderman: ${slayers?.enderman?.xp ?? 0}<br/>
+        Blaze: ${slayers?.blaze?.xp ?? 0}<br/>
+        HOTM Level: ${sb.mining_core?.experience ?? 0} xp<br/>
+        Garden XP: ${sb.garden?.experience ?? 0}<br/>
+        Pets: ${pets.map(p=>p.type+" ("+p.tier+")").join(", ") || "—"}
+      </div>
+    `;
+  } catch(e){
+    out.textContent = "Error: " + e;
+  }
+}
+
+document.getElementById("go").onclick = lookup;
+</script>
 </body>
 </html>
