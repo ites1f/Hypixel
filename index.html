@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <title>SkyViewer</title>
+  <style>body{font-family:system-ui,Segoe UI,Arial;margin:2rem} .card{border:1px solid #ddd;border-radius:12px;padding:16px;margin:12px 0}</style>
+</head>
+<body>
+  <h1>SkyViewer</h1>
+  <input id="ign" placeholder="Enter IGN (e.g., ites1f)" />
+  <button id="go">Search</button>
+  <div id="out"></div>
+
+  <script>
+    const API = "https://your-worker.workers.dev"; // <-- put your Worker URL
+    async function byNameToUuid(name){
+      const r = await fetch(`https://playerdb.co/api/player/minecraft/${encodeURIComponent(name)}`);
+      const j = await r.json(); if(!j?.data?.player?.id) throw new Error("IGN not found");
+      return j.data.player.id.replace(/-/g,"");
+    }
+    async function lookup(){
+      const ign = document.getElementById("ign").value.trim();
+      const out = document.getElementById("out"); out.innerHTML = "Loading...";
+      try{
+        const uuid = await byNameToUuid(ign);
+        const [player, profiles, status, guild] = await Promise.all([
+          fetch(`${API}/api/player?uuid=${uuid}`).then(r=>r.json()),
+          fetch(`${API}/api/skyblock/profiles?uuid=${uuid}`).then(r=>r.json()),
+          fetch(`${API}/api/status?uuid=${uuid}`).then(r=>r.json()),
+          fetch(`${API}/api/guild?uuid=${uuid}`).then(r=>r.json()),
+        ]);
+        out.innerHTML = `
+          <div class="card"><b>General</b><br/>UUID: ${uuid}<br/>Name: ${player?.player?.displayname ?? "—"}<br/>Guild: ${guild?.guild?.name ?? "—"}<br/>Online: ${status?.session?.online ? "Yes":"No"}</div>
+          <div class="card"><b>SkyBlock</b><br/>Profiles: ${profiles?.profiles?.length ?? 0}<br/>First profile: ${profiles?.profiles?.[0]?.cute_name ?? "—"}</div>
+        `;
+      }catch(e){ out.textContent = "Error: " + e.message; }
+    }
+    document.getElementById("go").onclick = lookup;
+  </script>
+</body>
+</html>
