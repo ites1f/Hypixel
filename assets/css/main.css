@@ -3546,3 +3546,95 @@ input, select, textarea {
     filter: brightness(1.1);
 }
 */
+/* ===== SkyViewer layout overrides (scoped to #stats) ===== */
+
+/* Center the whole stats section and limit width */
+#stats .inner{
+  max-width: 760px;      /* matches your screenshot’s narrow width */
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Section title subtler like screenshot */
+#stats header.major p{
+  opacity: .7;
+  margin-top: .25rem;
+}
+
+/* thin divider under the subtitle */
+#stats header.major::after{
+  content:"";
+  display:block;
+  width: 180px;
+  height: 2px;
+  margin: 18px auto 10px;
+  background: #e5e7eb;
+  border-radius: 1px;
+}
+
+/* Search row */
+#stats .search{
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  align-items:center;
+  margin: 12px auto 18px;
+}
+#stats .search input{
+  width: 260px;
+  height: 40px;
+  padding: 8px 10px;
+  border: 1px solid #cfd3da;
+  border-radius: 6px;
+  background: #fff;
+}
+#stats .search .button{
+  height: 40px;
+  line-height: 38px;
+  letter-spacing: .12em;
+  font-weight: 800;
+}
+
+/* Tabs row */
+#stats .tabs{
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  margin: 10px 0 22px;
+}
+#stats .tabs .tab{
+  border:1px solid #e0e5ec;
+  background:#fff;
+  padding:10px 16px;
+  border-radius: 10px;
+  font-weight:700;
+  letter-spacing:.06em;
+  cursor:pointer;
+}
+#stats .tabs .tab.active{
+  background:#eef1f5;
+  border-color:#d1d7df;
+  box-shadow: 0 3px 0 #c1c7d0; /* the little “underline” look */
+}
+
+/* Panels: left-align content below the centered tab bar */
+#stats #panel-overview,
+#stats #panel-skyblock,
+#stats #panel-slayer,
+#stats #panel-pets{
+  text-align:left;
+  margin-top: 6px;
+}
+
+/* Lists inside panels */
+#stats ul{
+  margin: .25rem 0 0 1.25rem;  /* slight indent like your screenshot */
+  line-height: 1.65;
+}
+
+/* error message under search */
+#stats #msg{
+  color:#d33;
+  text-align:center;
+  margin-top: 8px;
+}
