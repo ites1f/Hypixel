@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>Hypixelstats_ites1f</title>
+  <title>HypixelStats</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <style>
     body { font-family: system-ui, Arial; margin: 2rem; background: #0b1220; color: #e9eefc; }
@@ -10,16 +10,68 @@
     button { background: #62d0ff; color: #000; font-weight: bold; cursor: pointer; }
     .card { border: 1px solid #333; border-radius: 12px; padding: 16px; margin: 12px 0; background:#121a2e; }
     h1 { color: #ffd166; }
+    h2 { margin-top:0; color:#62d0ff; }
   </style>
 </head>
 <body>
-  <h1>Hypixel Stats (+Skyblock)</h1>
-  <input id="ign" placeholder="Enter IGN (e.g., ites1f)" />
+  <h1>Stats Finder(tmp)</h1>
+  <input id="ign" placeholder="Enter IGN" />
   <button id="go">Search</button>
   <div id="out"></div>
 
 <script>
-const API = "https://sparkling-mode-89ee.wsciteslf.workers.dev"; // put your worker URL here
+// ==================== LOOKUP TABLES ====================
+
+// Skills
+const SKILL_XP = [
+  0, 50, 175, 375, 675, 1175, 1925, 2925, 4425, 6425,
+  9925, 14925, 22425, 32425, 47425, 67425, 97425, 147425, 222425, 322425,
+  522425, 822425, 1222425, 1722425, 2322425, 3022425, 3822425, 4722425, 5722425, 6822425,
+  8022425, 9322425, 10722425, 12222425, 13822425, 15522425, 17322425, 19222425, 21222425, 23322425,
+  25522425, 27822425, 30222425, 32722425, 35322425, 38022425, 40822425, 43722425, 46722425, 49822425,
+  53022425, 56322425, 59722425, 63222425, 66822425, 70522425, 74322425, 78222425, 82222425, 86322425
+];
+function skillXpToLevel(xp) {
+  let lvl = 0;
+  for (let i = 0; i < SKILL_XP.length; i++) {
+    if (xp >= SKILL_XP[i]) lvl = i;
+    else break;
+  }
+  return lvl;
+}
+
+// Slayers
+const SLAYER_XP = {
+  zombie:    [0, 5, 15, 200, 1000, 5000, 20000, 100000, 400000, 1000000],
+  spider:    [0, 5, 15, 200, 1000, 5000, 20000, 100000, 400000, 1000000],
+  wolf:      [0, 5, 15, 200, 1500, 5000, 20000, 100000, 400000, 1000000],
+  enderman:  [0, 10, 30, 250, 1500, 5000, 20000, 100000, 400000, 1000000],
+  blaze:     [0, 10, 30, 250, 1500, 5000, 20000, 100000, 400000, 1000000]
+};
+function slayerXpToLevel(xp, type) {
+  const reqs = SLAYER_XP[type] || [];
+  let lvl = 0;
+  for (let i = 0; i < reqs.length; i++) {
+    if (xp >= reqs[i]) lvl = i;
+    else break;
+  }
+  return lvl;
+}
+
+// HOTM
+const HOTM_XP = [0, 0, 100, 250, 1000, 5000, 25000, 100000, 250000, 1000000];
+function hotmXpToLevel(xp) {
+  let lvl = 0;
+  for (let i = 0; i < HOTM_XP.length; i++) {
+    if (xp >= HOTM_XP[i]) lvl = i;
+    else break;
+  }
+  return lvl;
+}
+
+// ==================== API + UTILS ====================
+
+const API = "https://sparkling-mode-89ee.wsciteslf.workers.dev";
 
 async function byNameToUuid(name){
   const r = await fetch(`https://playerdb.co/api/player/minecraft/${encodeURIComponent(name)}`);
@@ -29,15 +81,12 @@ async function byNameToUuid(name){
   return j.data.player.id.replace(/-/g,"");
 }
 
-function xpToLevel(xp){
-  // Network XP → Network Level formula (approx)
-  return Math.floor(1 + Math.sqrt(xp + 15312.5) / 125);
+function xpToNetworkLevel(xp){
+  // Official Hypixel network level formula
+  return Math.floor((Math.sqrt((2 * xp) + 30625) / 50) - 2.5);
 }
 
-function skillXpToLevel(xp){
-  // crude scaling (Hypixel has tables, but this is close)
-  return Math.floor(Math.pow(xp/50, 0.5));
-}
+// ==================== MAIN LOOKUP ====================
 
 async function lookup(){
   const ign = document.getElementById("ign").value.trim();
@@ -58,10 +107,28 @@ async function lookup(){
     const prof = profiles.profiles?.find(x => x.selected) ?? profiles.profiles?.[0];
     const sb = prof?.members?.[uuid] ?? {};
 
-    // Basic stats
-    const networkLevel = xpToLevel(p.networkExp ?? 0);
+    // Network level
+    const networkLevel = xpToNetworkLevel(p.networkExp ?? 0);
+
+    // Skills
+    const farmingLevel = skillXpToLevel(sb.experience_skill_farming ?? 0);
+    const miningLevel  = skillXpToLevel(sb.experience_skill_mining ?? 0);
+    const combatLevel  = skillXpToLevel(sb.experience_skill_combat ?? 0);
+
+    // Slayer levels
+    const zombieSlayer   = slayerXpToLevel(sb.slayer_bosses?.zombie?.xp ?? 0, "zombie");
+    const spiderSlayer   = slayerXpToLevel(sb.slayer_bosses?.spider?.xp ?? 0, "spider");
+    const wolfSlayer     = slayerXpToLevel(sb.slayer_bosses?.wolf?.xp ?? 0, "wolf");
+    const endermanSlayer = slayerXpToLevel(sb.slayer_bosses?.enderman?.xp ?? 0, "enderman");
+    const blazeSlayer    = slayerXpToLevel(sb.slayer_bosses?.blaze?.xp ?? 0, "blaze");
+
+    // HOTM
+    const hotmLevel = hotmXpToLevel(sb.mining_core?.experience ?? 0);
+
+    // Fairy souls
     const fairySouls = sb.fairy_souls_collected ?? 0;
-    const slayers = sb.slayer_bosses ?? {};
+
+    // Pets
     const pets = sb.pets ?? [];
 
     out.innerHTML = `
@@ -86,24 +153,13 @@ async function lookup(){
       </div>
       <div class="card">
         <h2>SkyBlock (${prof?.cute_name ?? "—"})</h2>
+        Farming: ${farmingLevel}<br/>
+        Mining: ${miningLevel}<br/>
+        Combat: ${combatLevel}<br/>
         Fairy Souls: ${fairySouls}<br/>
-        Skills (XP→Level rough):<br/>
-        Farming: ${skillXpToLevel(sb.experience_skill_farming ?? 0)}<br/>
-        Mining: ${skillXpToLevel(sb.experience_skill_mining ?? 0)}<br/>
-        Combat: ${skillXpToLevel(sb.experience_skill_combat ?? 0)}<br/>
-        Foraging: ${skillXpToLevel(sb.experience_skill_foraging ?? 0)}<br/>
-        Fishing: ${skillXpToLevel(sb.experience_skill_fishing ?? 0)}<br/>
-        Enchanting: ${skillXpToLevel(sb.experience_skill_enchanting ?? 0)}<br/>
-        Alchemy: ${skillXpToLevel(sb.experience_skill_alchemy ?? 0)}<br/>
-        Slayer XP totals:<br/>
-        Zombie: ${slayers?.zombie?.xp ?? 0}<br/>
-        Spider: ${slayers?.spider?.xp ?? 0}<br/>
-        Wolf: ${slayers?.wolf?.xp ?? 0}<br/>
-        Enderman: ${slayers?.enderman?.xp ?? 0}<br/>
-        Blaze: ${slayers?.blaze?.xp ?? 0}<br/>
-        HOTM Level: ${sb.mining_core?.experience ?? 0} xp<br/>
-        Garden XP: ${sb.garden?.experience ?? 0}<br/>
-        Pets: ${pets.map(p=>p.type+" ("+p.tier+")").join(", ") || "—"}
+        Slayer Lvls → Zombie: ${zombieSlayer}, Spider: ${spiderSlayer}, Wolf: ${wolfSlayer}, Enderman: ${endermanSlayer}, Blaze: ${blazeSlayer}<br/>
+        HOTM Level: ${hotmLevel}<br/>
+        Pets: ${pets.map(pet => pet.type + " (" + pet.tier + ")").join(", ") || "—"}
       </div>
     `;
   } catch(e){
