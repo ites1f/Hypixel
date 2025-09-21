@@ -1,186 +1,295 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <title>SkyViewer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <style>
-    body { font-family: system-ui, Arial; margin: 2rem; background: #0b1220; color: #e9eefc; }
-    input, button { padding: 0.5rem; border-radius: 8px; border: 1px solid #555; }
-    button { background: #62d0ff; color: #000; font-weight: bold; cursor: pointer; }
-    .card { border: 1px solid #333; border-radius: 12px; padding: 16px; margin: 12px 0; background:#121a2e; }
-    h1 { color: #ffd166; }
-    h2 { margin-top:0; color:#62d0ff; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SkyViewer</title>
+<style>
+  :root{
+    --ink:#111827; --muted:#6b7280;
+    --line:#e5e7eb; --card:#ffffff;
+    --accent:#62d0ff; --accent2:#ffd166;
+    --btn:#f7f8fa; --btn-border:#d8dbe1;
+    --hero-0:#dfe4ea; --hero-1:#cfd6dd; --hero-2:#bfc7cf; --hero-3:#b8c0c8;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; color:var(--ink); background:#f8fafc}
+  .container{max-width:1100px; margin:0 auto; padding:0 20px}
+
+  /* HERO */
+  .hero{
+    background: radial-gradient(1200px 600px at 50% -20%, var(--hero-0) 0%, var(--hero-1) 40%, var(--hero-2) 70%, var(--hero-3) 100%);
+    text-align:center; padding:96px 20px 80px;
+  }
+  .hero h1{font-size:clamp(36px,5vw,56px); margin:0 0 8px}
+  .rule{width:120px;height:1px;background:rgba(0,0,0,.15);margin:16px auto 18px;border-radius:1px}
+  .hero p{margin:0 0 26px; color:var(--muted)}
+  .btn{padding:12px 22px; border-radius:var(--radius); border:1px solid var(--btn-border);
+       background:var(--btn); color:#0f172a; font-weight:700; letter-spacing:.08em; font-size:14px; cursor:pointer;
+       transition:transform .06s ease, box-shadow .2s, border-color .2s, background .2s}
+  .btn:hover{transform:translateY(-1px); box-shadow:0 8px 24px rgba(0,0,0,.06)}
+  .btn:active{transform:translateY(0)}
+  .btn.ghost{background:transparent}
+  .btn.primary{background:var(--accent); border-color:transparent; color:#001018}
+  .btns{display:flex; gap:14px; justify-content:center; flex-wrap:wrap}
+
+  /* Sections */
+  section{padding:72px 0}
+  .title{text-align:center; margin-bottom:30px}
+  .title h2{margin:0 0 10px; font-size:clamp(26px,3.2vw,36px)}
+  .title .rule{background:var(--line)}
+  .grid{display:grid; gap:18px; grid-template-columns:repeat(12,1fr)}
+  .grid .cell{grid-column:span 12}
+  @media (min-width:640px){ .grid .cell{grid-column:span 6}}
+  @media (min-width:960px){ .grid .cell{grid-column:span 4}}
+
+  /* Cards + tabs */
+  .card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px; box-shadow:0 10px 24px rgba(0,0,0,.04)}
+  .panel-title{display:flex; align-items:center; gap:10px; margin:0 0 10px}
+  .chip{font-size:12px; padding:4px 8px; border:1px solid var(--line); border-radius:999px; color:#0b4a6e; background:#f0f7ff}
+  .kv{display:grid; grid-template-columns:160px 1fr; gap:8px 14px; font-size:14px}
+  .kv div:nth-child(odd){color:var(--muted)}
+  .tabs{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px}
+  .tab{padding:8px 12px; border:1px solid var(--line); border-radius:10px; background:#fff; cursor:pointer; font-weight:600; font-size:13px}
+  .tab.active{background:#f0f7ff; border-color:#cfe8ff; color:#0b4a6e}
+  .error{margin-top:10px; color:#b91c1c; font-weight:600}
+  footer{padding:60px 20px; text-align:center; color:#9aa1ab}
+</style>
 </head>
 <body>
-  <h1>SkyViewer</h1>
-  <input id="ign" placeholder="Enter IGN (e.g., ites1f)" />
-  <button id="go">Search</button>
-  <div id="out"></div>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="container">
+      <h1>SkyViewer</h1>
+      <div class="rule"></div>
+      <p>Clean stats, simple UI — inspired by your “Random Buttons” style.</p>
+      <div class="btns">
+        <button class="btn primary">READ AGAIN</button>
+        <button class="btn ghost">READ AGAIN</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- QUICK LINKS STRIP -->
+  <section>
+    <div class="container">
+      <div class="title">
+        <h2>Random Buttons</h2>
+        <div class="rule"></div>
+        <p class="muted">Customize these however you want.</p>
+      </div>
+      <div class="grid">
+        <div class="cell"><a class="btn ghost" style="display:block; text-align:center">CONTACT ME</a></div>
+        <div class="cell"><a class="btn" style="display:block; text-align:center">MY GITHUB</a></div>
+        <div class="cell"><a class="btn ghost" style="display:block; text-align:center">EXTRA BUTTON 1</a></div>
+        <div class="cell"><a class="btn ghost" style="display:block; text-align:center">PLAYGROUND</a></div>
+        <div class="cell"><a class="btn" style="display:block; text-align:center">PERSONAL</a></div>
+        <div class="cell"><a class="btn ghost" style="display:block; text-align:center" href="#stats">HYPIXEL STATS</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKYVIEWER APP -->
+  <section id="stats">
+    <div class="container">
+      <div class="title">
+        <h2>Hypixel Stats</h2>
+        <div class="rule"></div>
+        <p>Enter an IGN to view general + SkyBlock info.</p>
+      </div>
+
+      <!-- Search -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="btns" style="justify-content:flex-start; gap:10px">
+          <input id="ign" placeholder="Enter IGN (e.g., ites1f)"
+                 style="flex:1; min-width:240px; padding:12px 14px; border-radius:var(--radius); border:1px solid var(--line); background:#fff" />
+          <button id="go" class="btn">Search</button>
+        </div>
+        <div id="msg" class="error" style="display:none"></div>
+      </div>
+
+      <!-- Tabs + Panels -->
+      <div class="card">
+        <div class="tabs">
+          <button class="tab active" data-tab="overview">Overview</button>
+          <button class="tab" data-tab="skyblock">SkyBlock</button>
+          <button class="tab" data-tab="slayer">Slayer</button>
+          <button class="tab" data-tab="pets">Pets</button>
+        </div>
+
+        <!-- Overview -->
+        <div id="panel-overview">
+          <h3 class="panel-title">General <span class="chip">Live</span></h3>
+          <div class="kv">
+            <div>Name</div><div id="ov-name">—</div>
+            <div>Rank</div><div id="ov-rank">—</div>
+            <div>Network Level</div><div id="ov-level">—</div>
+            <div>Karma</div><div id="ov-karma">—</div>
+            <div>Online</div><div id="ov-online">—</div>
+            <div>Guild</div><div id="ov-guild">—</div>
+          </div>
+        </div>
+
+        <!-- SkyBlock -->
+        <div id="panel-skyblock" style="display:none">
+          <h3 class="panel-title">SkyBlock <span class="chip" id="sb-profile">—</span></h3>
+          <div class="kv">
+            <div>Farming</div><div id="sb-farming">—</div>
+            <div>Mining</div><div id="sb-mining">—</div>
+            <div>Combat</div><div id="sb-combat">—</div>
+            <div>Fairy Souls</div><div id="sb-fairy">—</div>
+            <div>HOTM</div><div id="sb-hotm">—</div>
+          </div>
+        </div>
+
+        <!-- Slayer -->
+        <div id="panel-slayer" style="display:none">
+          <h3 class="panel-title">Slayer</h3>
+          <div class="kv">
+            <div>Zombie</div><div id="sl-zombie">—</div>
+            <div>Spider</div><div id="sl-spider">—</div>
+            <div>Wolf</div><div id="sl-wolf">—</div>
+            <div>Enderman</div><div id="sl-endo">—</div>
+            <div>Blaze</div><div id="sl-blaze">—</div>
+          </div>
+        </div>
+
+        <!-- Pets -->
+        <div id="panel-pets" style="display:none">
+          <h3 class="panel-title">Pets</h3>
+          <div id="pets-list" class="kv">
+            <div>List</div><div>—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>© <span id="y"></span> ites1f • SkyViewer</footer>
 
 <script>
-// ==================== LOOKUP TABLES ====================
+  // ---------------- THE ONLY THING YOU MUST CHANGE ----------------
+  const API = "https://sparkling-mode-89ee.wsciteslf.workers.dev"; // <--- put YOUR worker URL
+  // ----------------------------------------------------------------
 
-// Skills (cumulative XP requirements)
-const SKILL_XP = [
-  0, 50, 175, 375, 675, 1175, 1925, 2925, 4425, 6425,
-  9925, 14925, 22425, 32425, 47425, 67425, 97425, 147425, 222425, 322425,
-  522425, 822425, 1222425, 1722425, 2322425, 3022425, 3822425, 4722425, 5722425, 6822425,
-  8022425, 9322425, 10722425, 12222425, 13822425, 15522425, 17322425, 19222425, 21222425, 23322425,
-  25522425, 27822425, 30222425, 32722425, 35322425, 38022425, 40822425, 43722425, 46722425, 49822425,
-  53022425, 56322425, 59722425, 63222425, 66822425, 70522425, 74322425, 78222425, 82222425, 86322425
-];
-function skillXpToLevel(xp) {
-  let lvl = 0;
-  for (let i = 0; i < SKILL_XP.length; i++) {
-    if (xp >= SKILL_XP[i]) lvl = i;
-    else break;
+  // Tabs
+  const tabs = document.querySelectorAll('.tab');
+  const panels = {
+    overview: document.getElementById('panel-overview'),
+    skyblock: document.getElementById('panel-skyblock'),
+    slayer: document.getElementById('panel-slayer'),
+    pets: document.getElementById('panel-pets'),
+  };
+  tabs.forEach(t => t.addEventListener('click', () => {
+    tabs.forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    Object.values(panels).forEach(p => p.style.display = 'none');
+    panels[t.dataset.tab].style.display = 'block';
+  }));
+  document.getElementById('y').textContent = new Date().getFullYear();
+
+  // Lookup tables ---------------------------
+  const SKILL_XP = [
+    0,50,175,375,675,1175,1925,2925,4425,6425,
+    9925,14925,22425,32425,47425,67425,97425,147425,222425,322425,
+    522425,822425,1222425,1722425,2322425,3022425,3822425,4722425,5722425,6822425,
+    8022425,9322425,10722425,12222425,13822425,15522425,17322425,19222425,21222425,23322425,
+    25522425,27822425,30222425,32722425,35322425,38022425,40822425,43722425,46722425,49822425,
+    53022425,56322425,59722425,63222425,66822425,70522425,74322425,78222425,82222425,86322425
+  ];
+  function skillXpToLevel(xp){ let lvl=0; for(let i=0;i<SKILL_XP.length;i++){ if(xp>=SKILL_XP[i]) lvl=i; else break; } return lvl; }
+
+  const SLAYER_XP = {
+    zombie:[0,5,15,200,1000,5000,20000,100000,400000,1000000],
+    spider:[0,5,15,200,1000,5000,20000,100000,400000,1000000],
+    wolf:[0,5,15,200,1500,5000,20000,100000,400000,1000000],
+    enderman:[0,10,30,250,1500,5000,20000,100000,400000,1000000],
+    blaze:[0,10,30,250,1500,5000,20000,100000,400000,1000000]
+  };
+  function slayerXpToLevel(xp,t){const req=SLAYER_XP[t]||[]; let lvl=0; for(let i=0;i<req.length;i++){ if(xp>=req[i]) lvl=i; else break; } return lvl;}
+
+  const HOTM_XP=[0,0,100,250,1000,5000,25000,100000,250000,1000000];
+  function hotmXpToLevel(xp){ let lvl=0; for(let i=0;i<HOTM_XP.length;i++){ if(xp>=HOTM_XP[i]) lvl=i; else break; } return lvl; }
+
+  function xpToNetworkLevel(xp){ return Math.floor((Math.sqrt((2*xp)+30625)/50)-2.5); }
+
+  // Helpers --------------------------------
+  async function byNameToUuid(name){
+    const r = await fetch(`https://playerdb.co/api/player/minecraft/${encodeURIComponent(name)}`);
+    if(!r.ok) throw new Error("IGN lookup failed");
+    const j = await r.json();
+    const id = j?.data?.player?.id;
+    if(!id) throw new Error("IGN not found");
+    return id.replace(/-/g,"");
   }
-  return lvl;
-}
+  function setMsg(text){ const m=document.getElementById('msg'); if(text){ m.style.display='block'; m.textContent=text; } else { m.style.display='none'; m.textContent=''; } }
 
-// Slayer XP requirements
-const SLAYER_XP = {
-  zombie:    [0, 5, 15, 200, 1000, 5000, 20000, 100000, 400000, 1000000],
-  spider:    [0, 5, 15, 200, 1000, 5000, 20000, 100000, 400000, 1000000],
-  wolf:      [0, 5, 15, 200, 1500, 5000, 20000, 100000, 400000, 1000000],
-  enderman:  [0, 10, 30, 250, 1500, 5000, 20000, 100000, 400000, 1000000],
-  blaze:     [0, 10, 30, 250, 1500, 5000, 20000, 100000, 400000, 1000000]
-};
-function slayerXpToLevel(xp, type) {
-  const reqs = SLAYER_XP[type] || [];
-  let lvl = 0;
-  for (let i = 0; i < reqs.length; i++) {
-    if (xp >= reqs[i]) lvl = i;
-    else break;
-  }
-  return lvl;
-}
+  // Click handler --------------------------
+  document.getElementById("go").onclick = async () => {
+    try{
+      setMsg("");
+      const ign = document.getElementById("ign").value.trim();
+      if(!ign) return setMsg("Type an IGN first.");
+      const uuidNoDash = await byNameToUuid(ign);
+      const uuidDashed = uuidNoDash.replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/,"$1-$2-$3-$4-$5");
 
-// HOTM XP thresholds
-const HOTM_XP = [0, 0, 100, 250, 1000, 5000, 25000, 100000, 250000, 1000000];
-function hotmXpToLevel(xp) {
-  let lvl = 0;
-  for (let i = 0; i < HOTM_XP.length; i++) {
-    if (xp >= HOTM_XP[i]) lvl = i;
-    else break;
-  }
-  return lvl;
-}
+      const [player, status, guild, profiles] = await Promise.all([
+        fetch(`${API}/api/player?uuid=${uuidDashed}`).then(r=>r.json()),
+        fetch(`${API}/api/status?uuid=${uuidDashed}`).then(r=>r.json()),
+        fetch(`${API}/api/guild?uuid=${uuidDashed}`).then(r=>r.json()),
+        fetch(`${API}/api/skyblock/profiles?uuid=${uuidDashed}`).then(r=>r.json()),
+      ]);
 
-// ==================== API + UTILS ====================
+      // ---- Overview ----
+      const p = player.player ?? {};
+      const st = status.session ?? {};
+      const g = guild.guild ?? {};
+      document.getElementById("ov-name").textContent  = p.displayname ?? ign;
+      document.getElementById("ov-rank").textContent  = p.rank ?? p.newPackageRank ?? "—";
+      document.getElementById("ov-level").textContent = xpToNetworkLevel(p.networkExp ?? 0);
+      document.getElementById("ov-karma").textContent = p.karma ?? 0;
+      document.getElementById("ov-online").textContent= st.online ? "Yes" : "No";
+      document.getElementById("ov-guild").textContent = g.name ?? "—";
 
-// Replace with your real Worker URL
-const API = "https://sparkling-mode-89ee.wsciteslf.workers.dev";
+      // ---- SkyBlock pick profile safely ----
+      let prof=null;
+      if (profiles && Array.isArray(profiles.profiles) && profiles.profiles.length>0){
+        prof = profiles.profiles.find(x=>x.selected) ?? profiles.profiles[0];
+      }
+      document.getElementById("sb-profile").textContent = prof?.cute_name ?? "No Profile";
 
-async function byNameToUuid(name){
-  const r = await fetch(`https://playerdb.co/api/player/minecraft/${encodeURIComponent(name)}`);
-  if (!r.ok) throw new Error("PlayerDB lookup failed");
-  const j = await r.json();
-  if (!j?.data?.player?.id) throw new Error("IGN not found");
-  return j.data.player.id.replace(/-/g,"");
-}
+      let sb={};
+      if(prof?.members){ sb = prof.members[uuidNoDash] ?? {}; }
 
-function xpToNetworkLevel(xp){
-  // Official Hypixel network level formula
-  return Math.floor((Math.sqrt((2 * xp) + 30625) / 50) - 2.5);
-}
+      document.getElementById("sb-farming").textContent = sb.experience_skill_farming!=null ? skillXpToLevel(sb.experience_skill_farming) : "—";
+      document.getElementById("sb-mining").textContent  = sb.experience_skill_mining!=null  ? skillXpToLevel(sb.experience_skill_mining)  : "—";
+      document.getElementById("sb-combat").textContent  = sb.experience_skill_combat!=null  ? skillXpToLevel(sb.experience_skill_combat)  : "—";
+      document.getElementById("sb-fairy").textContent   = sb.fairy_souls_collected ?? "—";
+      document.getElementById("sb-hotm").textContent    = hotmXpToLevel(sb.mining_core?.experience ?? 0);
 
-// ==================== MAIN LOOKUP ====================
+      // ---- Slayer ----
+      const sl = sb.slayer_bosses ?? {};
+      document.getElementById("sl-zombie").textContent = slayerXpToLevel(sl.zombie?.xp ?? 0,"zombie");
+      document.getElementById("sl-spider").textContent = slayerXpToLevel(sl.spider?.xp ?? 0,"spider");
+      document.getElementById("sl-wolf").textContent   = slayerXpToLevel(sl.wolf?.xp ?? 0,"wolf");
+      document.getElementById("sl-endo").textContent   = slayerXpToLevel(sl.enderman?.xp ?? 0,"enderman");
+      document.getElementById("sl-blaze").textContent  = slayerXpToLevel(sl.blaze?.xp ?? 0,"blaze");
 
-async function lookup(){
-  const ign = document.getElementById("ign").value.trim();
-  const out = document.getElementById("out"); out.textContent = "Loading…";
-  try{
-    const uuid = await byNameToUuid(ign);
+      // ---- Pets ----
+      const pets = Array.isArray(sb.pets) ? sb.pets : [];
+      const list = pets.length ? pets.map(p => `${p.type} (${p.tier})`).join(", ") : "—";
+      document.querySelector("#pets-list div:nth-child(2)").textContent = list;
 
-    const [player, status, guild, profiles] = await Promise.all([
-      fetch(`${API}/api/player?uuid=${uuid}`).then(r=>r.json()),
-      fetch(`${API}/api/status?uuid=${uuid}`).then(r=>r.json()),
-      fetch(`${API}/api/guild?uuid=${uuid}`).then(r=>r.json()),
-      fetch(`${API}/api/skyblock/profiles?uuid=${uuid}`).then(r=>r.json()),
-    ]);
+      // If profiles missing
+      if(!prof) setMsg("No SkyBlock data (API disabled or no profiles).");
 
-    const p = player.player ?? {};
-    const g = guild.guild ?? {};
-    const st = status.session ?? {};
-
-    // --- SkyBlock ---
-    let prof = null;
-    if (profiles && Array.isArray(profiles.profiles) && profiles.profiles.length > 0) {
-      prof = profiles.profiles.find(x => x.selected) ?? profiles.profiles[0];
+    }catch(err){
+      console.error(err);
+      setMsg(String(err));
     }
-
-    let sb = {};
-    if (prof && prof.members) {
-      const dashless = uuid.replace(/-/g, "");
-      sb = prof.members[dashless] ?? {};
-    }
-
-    // Network level
-    const networkLevel = xpToNetworkLevel(p.networkExp ?? 0);
-
-    // Skills
-    const farmingLevel = sb.experience_skill_farming !== undefined ? skillXpToLevel(sb.experience_skill_farming) : "—";
-    const miningLevel  = sb.experience_skill_mining  !== undefined ? skillXpToLevel(sb.experience_skill_mining) : "—";
-    const combatLevel  = sb.experience_skill_combat  !== undefined ? skillXpToLevel(sb.experience_skill_combat) : "—";
-
-    // Slayer levels
-    const zombieSlayer   = slayerXpToLevel(sb.slayer_bosses?.zombie?.xp ?? 0, "zombie");
-    const spiderSlayer   = slayerXpToLevel(sb.slayer_bosses?.spider?.xp ?? 0, "spider");
-    const wolfSlayer     = slayerXpToLevel(sb.slayer_bosses?.wolf?.xp ?? 0, "wolf");
-    const endermanSlayer = slayerXpToLevel(sb.slayer_bosses?.enderman?.xp ?? 0, "enderman");
-    const blazeSlayer    = slayerXpToLevel(sb.slayer_bosses?.blaze?.xp ?? 0, "blaze");
-
-    // HOTM
-    const hotmLevel = hotmXpToLevel(sb.mining_core?.experience ?? 0);
-
-    // Fairy souls
-    const fairySouls = sb.fairy_souls_collected ?? 0;
-
-    // Pets
-    const pets = sb.pets ?? [];
-
-    out.innerHTML = `
-      <div class="card">
-        <h2>General</h2>
-        Name: ${p.displayname ?? ign}<br/>
-        Rank: ${p.rank ?? p.newPackageRank ?? "—"}<br/>
-        Network Level: ${networkLevel}<br/>
-        Karma: ${p.karma ?? 0}
-      </div>
-      <div class="card">
-        <h2>Status</h2>
-        Online: ${st.online ? "Yes" : "No"}<br/>
-        Game: ${st.gameType ?? "—"}<br/>
-        Mode: ${st.mode ?? "—"}<br/>
-        Map: ${st.map ?? "—"}
-      </div>
-      <div class="card">
-        <h2>Guild</h2>
-        Name: ${g.name ?? "—"}<br/>
-        Tag: ${g.tag ?? "—"}
-      </div>
-      <div class="card">
-        <h2>SkyBlock (${prof?.cute_name ?? "No Profile"})</h2>
-        ${prof ? `
-          Farming: ${farmingLevel}<br/>
-          Mining: ${miningLevel}<br/>
-          Combat: ${combatLevel}<br/>
-          Fairy Souls: ${fairySouls}<br/>
-          Slayer Lvls → Zombie: ${zombieSlayer}, Spider: ${spiderSlayer}, Wolf: ${wolfSlayer}, Enderman: ${endermanSlayer}, Blaze: ${blazeSlayer}<br/>
-          HOTM Level: ${hotmLevel}<br/>
-          Pets: ${pets.map(pet => pet.type + " (" + pet.tier + ")").join(", ") || "—"}
-        ` : `No SkyBlock data (API disabled or no profiles).`}
-      </div>
-    `;
-  } catch(e){
-    out.textContent = "Error: " + e;
-  }
-}
-
-document.getElementById("go").onclick = lookup;
+  };
 </script>
 </body>
 </html>
