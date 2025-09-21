@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>HypixelStats</title>
+  <title>SkyViewer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <style>
     body { font-family: system-ui, Arial; margin: 2rem; background: #0b1220; color: #e9eefc; }
@@ -14,15 +14,15 @@
   </style>
 </head>
 <body>
-  <h1>Stats Finder(tmp)</h1>
-  <input id="ign" placeholder="Enter IGN" />
+  <h1>SkyViewer</h1>
+  <input id="ign" placeholder="Enter IGN (e.g., ites1f)" />
   <button id="go">Search</button>
   <div id="out"></div>
 
 <script>
 // ==================== LOOKUP TABLES ====================
 
-// Skills
+// Skills (cumulative XP requirements)
 const SKILL_XP = [
   0, 50, 175, 375, 675, 1175, 1925, 2925, 4425, 6425,
   9925, 14925, 22425, 32425, 47425, 67425, 97425, 147425, 222425, 322425,
@@ -40,7 +40,7 @@ function skillXpToLevel(xp) {
   return lvl;
 }
 
-// Slayers
+// Slayer XP requirements
 const SLAYER_XP = {
   zombie:    [0, 5, 15, 200, 1000, 5000, 20000, 100000, 400000, 1000000],
   spider:    [0, 5, 15, 200, 1000, 5000, 20000, 100000, 400000, 1000000],
@@ -58,7 +58,7 @@ function slayerXpToLevel(xp, type) {
   return lvl;
 }
 
-// HOTM
+// HOTM XP thresholds
 const HOTM_XP = [0, 0, 100, 250, 1000, 5000, 25000, 100000, 250000, 1000000];
 function hotmXpToLevel(xp) {
   let lvl = 0;
@@ -71,6 +71,7 @@ function hotmXpToLevel(xp) {
 
 // ==================== API + UTILS ====================
 
+// Replace with your real Worker URL
 const API = "https://sparkling-mode-89ee.wsciteslf.workers.dev";
 
 async function byNameToUuid(name){
@@ -104,16 +105,26 @@ async function lookup(){
     const p = player.player ?? {};
     const g = guild.guild ?? {};
     const st = status.session ?? {};
-    const prof = profiles.profiles?.find(x => x.selected) ?? profiles.profiles?.[0];
-    const sb = prof?.members?.[uuid] ?? {};
+
+    // --- SkyBlock ---
+    let prof = null;
+    if (profiles && Array.isArray(profiles.profiles) && profiles.profiles.length > 0) {
+      prof = profiles.profiles.find(x => x.selected) ?? profiles.profiles[0];
+    }
+
+    let sb = {};
+    if (prof && prof.members) {
+      const dashless = uuid.replace(/-/g, "");
+      sb = prof.members[dashless] ?? {};
+    }
 
     // Network level
     const networkLevel = xpToNetworkLevel(p.networkExp ?? 0);
 
     // Skills
-    const farmingLevel = skillXpToLevel(sb.experience_skill_farming ?? 0);
-    const miningLevel  = skillXpToLevel(sb.experience_skill_mining ?? 0);
-    const combatLevel  = skillXpToLevel(sb.experience_skill_combat ?? 0);
+    const farmingLevel = sb.experience_skill_farming !== undefined ? skillXpToLevel(sb.experience_skill_farming) : "—";
+    const miningLevel  = sb.experience_skill_mining  !== undefined ? skillXpToLevel(sb.experience_skill_mining) : "—";
+    const combatLevel  = sb.experience_skill_combat  !== undefined ? skillXpToLevel(sb.experience_skill_combat) : "—";
 
     // Slayer levels
     const zombieSlayer   = slayerXpToLevel(sb.slayer_bosses?.zombie?.xp ?? 0, "zombie");
@@ -152,14 +163,16 @@ async function lookup(){
         Tag: ${g.tag ?? "—"}
       </div>
       <div class="card">
-        <h2>SkyBlock (${prof?.cute_name ?? "—"})</h2>
-        Farming: ${farmingLevel}<br/>
-        Mining: ${miningLevel}<br/>
-        Combat: ${combatLevel}<br/>
-        Fairy Souls: ${fairySouls}<br/>
-        Slayer Lvls → Zombie: ${zombieSlayer}, Spider: ${spiderSlayer}, Wolf: ${wolfSlayer}, Enderman: ${endermanSlayer}, Blaze: ${blazeSlayer}<br/>
-        HOTM Level: ${hotmLevel}<br/>
-        Pets: ${pets.map(pet => pet.type + " (" + pet.tier + ")").join(", ") || "—"}
+        <h2>SkyBlock (${prof?.cute_name ?? "No Profile"})</h2>
+        ${prof ? `
+          Farming: ${farmingLevel}<br/>
+          Mining: ${miningLevel}<br/>
+          Combat: ${combatLevel}<br/>
+          Fairy Souls: ${fairySouls}<br/>
+          Slayer Lvls → Zombie: ${zombieSlayer}, Spider: ${spiderSlayer}, Wolf: ${wolfSlayer}, Enderman: ${endermanSlayer}, Blaze: ${blazeSlayer}<br/>
+          HOTM Level: ${hotmLevel}<br/>
+          Pets: ${pets.map(pet => pet.type + " (" + pet.tier + ")").join(", ") || "—"}
+        ` : `No SkyBlock data (API disabled or no profiles).`}
       </div>
     `;
   } catch(e){
