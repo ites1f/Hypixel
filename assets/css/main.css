@@ -3638,3 +3638,12 @@ input, select, textarea {
   text-align:center;
   margin-top: 8px;
 }
+/* Fix vertical centering of tab text */
+#stats .tabs .tab {
+  display: flex;
+  align-items: center;      /* vertically center text */
+  justify-content: center;  /* center horizontally too */
+  height: 42px;             /* set a consistent height */
+  padding: 0 18px;          /* horizontal padding only */
+  line-height: 1;           /* prevent extra vertical space */
+}
